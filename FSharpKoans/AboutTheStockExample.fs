@@ -60,6 +60,30 @@ module ``about the stock example`` =
 
     [<Koan>]
     let YouGotTheAnswerCorrect() =
-        let result =  __
+        let result =
+            let splitCommas (x:string) =
+                x.Split([|','|])
+
+            let columnIndex (name:string) (columns:string[]) =
+                columns
+                |> Seq.findIndex (fun x -> x = name)
+
+            // sample [ "Date,Open,High,Low,Close,Volume,Adj Close"; ..
+            let (columnDate, columnOpen, columnClose) =
+                stockData
+                |> List.head
+                |> splitCommas
+                |> fun xs -> (columnIndex "Date" xs, columnIndex "Open" xs, columnIndex "Close" xs)
+
+            let diffOpenClose (row:string[]) =
+                let o = System.Double.Parse row.[columnOpen]
+                let c = System.Double.Parse row.[columnClose]
+                abs <| o - c
+
+            stockData
+            |> List.tail
+            |> List.map splitCommas
+            |> List.maxBy diffOpenClose
+            |> fun row -> row.[columnDate]
         
         AssertEquality "2012-03-13" result
